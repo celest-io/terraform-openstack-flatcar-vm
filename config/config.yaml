@@ -1,0 +1,94 @@
+---
+storage:
+  files:
+    - path: /etc/hostname
+      filesystem: root
+      mode: 0644
+      contents:
+        inline: ${hostname}
+
+    - path: /etc/systemd/resolved.conf.d/00-default-dns-servers.conf
+      filesystem: root
+      mode: 0644
+      contents:
+        inline: |
+          [Resolve]
+          DNS=${dns_servers}
+
+    - path: /etc/flatcar/update.conf
+      filesystem: root
+      mode: 0644
+      contents:
+        inline: |
+          GROUP=${update_group}
+          SERVER=${update_server}
+          MACHINE_ALIAS=${hostname}
+          REBOOT_STRATEGY=reboot
+
+    - path: /etc/crictl.yaml
+      filesystem: root
+      mode: 0644
+      contents:
+        inline: |
+          runtime-endpoint: unix:///run/containerd/containerd.sock
+
+    - path: /opt/bin/reprovision
+      filesystem: root
+      mode: 0755
+      contents:
+        inline: |
+          #!/bin/bash
+          set -euo pipefail
+          touch /usr/share/oem/grub.cfg
+          sed -i "/linux_append systemd.machine_id=.*/d" /usr/share/oem/grub.cfg
+          echo "set linux_append=\"\$linux_append systemd.machine_id=$(cat /etc/machine-id)\"" >> /usr/share/oem/grub.cfg
+          touch /boot/flatcar/first_boot
+
+#########################################################################
+networkd:
+  units:
+    - name: 00-eth0.network
+      contents: |
+        [Match]
+        Name=eth0
+
+        [Network]
+        DHCP=yes
+
+        [DHCPv4]
+        UseDNS=no
+
+        [DHCPv6]
+        UseDNS=no
+
+    - name: 00-eth1.network
+      contents: |
+        [Match]
+        Name=eth1
+
+        [Network]
+        DHCP=yes
+
+        [DHCPv4]
+        UseDNS=no
+
+        [DHCPv6]
+        UseDNS=no
+
+#########################################################################
+systemd:
+  units:
+    - name: update-engine.service
+      enabled: true
+
+    - name: locksmithd.service
+      mask: true
+
+    - name: containerd.service
+      enabled: true
+
+    - name: docker.socket
+      mask: true
+
+    - name: docker.service
+      mask: true
