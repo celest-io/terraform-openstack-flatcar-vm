@@ -9,7 +9,7 @@ data "ct_config" "node" {
     dns_servers   = join(" ", var.dns_servers)
   })
   platform = "openstack-metadata"
-  snippets = var.clc_snippets
+  snippets = var.snippets
 }
 
 resource "openstack_compute_instance_v2" "node" {

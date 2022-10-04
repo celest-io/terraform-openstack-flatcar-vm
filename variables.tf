@@ -21,7 +21,7 @@ variable "tags" {
   default     = []
 }
 
-variable "clc_snippets" {
+variable "snippets" {
   type        = list(string)
   description = "List of Butane Config snippets."
   default     = []
