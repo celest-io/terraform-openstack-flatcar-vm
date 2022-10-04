@@ -1,14 +1,15 @@
 ---
+variant: flatcar
+version: 1.0.0
+passwd:
+  users:
+    - name: core
+      ssh_authorized_keys: ${ssh_keys}
+
+#########################################################################
 storage:
   files:
-    - path: /etc/hostname
-      filesystem: root
-      mode: 0644
-      contents:
-        inline: ${hostname}
-
     - path: /etc/systemd/resolved.conf.d/00-default-dns-servers.conf
-      filesystem: root
       mode: 0644
       contents:
         inline: |
@@ -16,7 +17,6 @@ storage:
           DNS=${dns_servers}
 
     - path: /etc/flatcar/update.conf
-      filesystem: root
       mode: 0644
       contents:
         inline: |
@@ -26,14 +26,12 @@ storage:
           REBOOT_STRATEGY=reboot
 
     - path: /etc/crictl.yaml
-      filesystem: root
       mode: 0644
       contents:
         inline: |
           runtime-endpoint: unix:///run/containerd/containerd.sock
 
     - path: /opt/bin/reprovision
-      filesystem: root
       mode: 0755
       contents:
         inline: |
@@ -44,36 +42,37 @@ storage:
           echo "set linux_append=\"\$linux_append systemd.machine_id=$(cat /etc/machine-id)\"" >> /usr/share/oem/grub.cfg
           touch /boot/flatcar/first_boot
 
-#########################################################################
-networkd:
-  units:
-    - name: 00-eth0.network
-      contents: |
-        [Match]
-        Name=eth0
+    - path: /etc/systemd/network/00-eth0.network
+      overwrite: true
+      contents:
+        inline: |
+          [Match]
+          Name=eth0
 
-        [Network]
-        DHCP=yes
+          [Network]
+          DHCP=yes
 
-        [DHCPv4]
-        UseDNS=no
+          [DHCPv4]
+          UseDNS=no
 
-        [DHCPv6]
-        UseDNS=no
+          [DHCPv6]
+          UseDNS=no
 
-    - name: 00-eth1.network
-      contents: |
-        [Match]
-        Name=eth1
+    - path: /etc/systemd/network/00-eth1.network
+      overwrite: true
+      contents:
+        inline: |
+          [Match]
+          Name=eth1
 
-        [Network]
-        DHCP=yes
+          [Network]
+          DHCP=yes
 
-        [DHCPv4]
-        UseDNS=no
+          [DHCPv4]
+          UseDNS=no
 
-        [DHCPv6]
-        UseDNS=no
+          [DHCPv6]
+          UseDNS=no
 
 #########################################################################
 systemd:

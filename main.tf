@@ -1,6 +1,8 @@
 data "ct_config" "node" {
+  strict       = true
   pretty_print = false
   content = templatefile("${path.module}/config/config.yaml", {
+    ssh_keys      = jsonencode(var.ssh_keys)
     hostname      = var.node_name
     update_group  = var.flatcar_update_group
     update_server = var.flatcar_update_server
@@ -20,7 +22,10 @@ resource "openstack_compute_instance_v2" "node" {
   security_groups = var.security_groups
   tags            = var.tags
 
-  network {
-    name = var.external_network_name
+  dynamic "network" {
+    for_each = var.networks
+    content {
+      name = network.value.name
+    }
   }
 }

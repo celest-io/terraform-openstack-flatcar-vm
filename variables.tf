@@ -23,13 +23,13 @@ variable "tags" {
 
 variable "clc_snippets" {
   type        = list(string)
-  description = "List of Container Linux Config snippets."
+  description = "List of Butane Config snippets."
   default     = []
 }
 
 variable "flavor" {
   type        = string
-  description = "Flavor."
+  description = "Flavor of the instance."
 }
 
 variable "image_name" {
@@ -40,7 +40,12 @@ variable "image_name" {
 
 variable "ssh_key_name" {
   type        = string
-  description = "The name of a key pair to assign to the instance"
+  description = "The name of a key pair to assign to the instance."
+}
+
+variable "ssh_keys" {
+  type        = list(string)
+  description = "SSH public keys for user 'core'."
 }
 
 variable "security_groups" {
@@ -48,14 +53,11 @@ variable "security_groups" {
   description = "List of security group names."
 }
 
-variable "external_network_name" {
-  type        = string
-  description = "A name of the external network"
-}
-
-variable "private_network_name" {
-  type        = string
-  description = "A name of the private network"
+variable "networks" {
+  type = set(object({
+    name = string
+  }))
+  description = "List of network name to attach to the instance."
 }
 
 variable "region" {
